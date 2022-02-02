@@ -22,14 +22,14 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -84,20 +84,33 @@ class SearchRepositoriesActivity : AppCompatActivity() {
                             item {
                                 Text(
                                     text = "Waiting for items to load from the backend",
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                         .wrapContentWidth(Alignment.CenterHorizontally)
                                 )
                             }
                         }
 
                         itemsIndexed(lazyPagingItems) { index, item ->
-                            Text("Index=$index: $item", fontSize = 20.sp)
+//                            Text("Index=$index: $item", fontSize = 20.sp)
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    if (item is UiModel.RepoItem) {
+                                        Text(item.repo.name)
+                                        Text(item.repo.description.toString())
+                                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                            Text("⭐${item.repo.stars}")
+                                            Text("Language: ${item.repo.language}")
+                                            Text("Forks: ${item.repo.forks}")
+                                        }
+                                    }
+                                }
                         }
 
                         if (lazyPagingItems.loadState.append == LoadState.Loading) {
                             item {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                         .wrapContentWidth(Alignment.CenterHorizontally)
                                 )
                             }
@@ -132,6 +145,14 @@ class SearchRepositoriesActivity : AppCompatActivity() {
         // add dividers between RecyclerView's row items
         val decoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
 //        binding.list.addItemDecoration(decoration)
+        // add dividers between RecyclerView's row items
+
+        initAdapter()
+        val query = savedInstanceState?.getString(LAST_SEARCH_QUERY) ?: DEFAULT_QUERY
+        search(query)
+        initSearch(query)
+        binding.retryButton.setOnClickListener { adapter.retry() }
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
