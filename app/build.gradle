@@ -51,7 +51,7 @@ android {
     }
 
     composeOptions{
-        kotlinCompilerExtensionVersion kotlin_version
+        kotlinCompilerExtensionVersion compose
     }
     namespace 'com.example.android.codelabs.paging'
 }
