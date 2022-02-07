@@ -16,12 +16,16 @@
 
 package com.example.android.codelabs.paging.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
@@ -29,6 +33,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.isVisible
@@ -91,19 +97,30 @@ class SearchRepositoriesActivity : AppCompatActivity() {
                             }
                         }
 
+
                         itemsIndexed(lazyPagingItems) { index, item ->
-//                            Text("Index=$index: $item", fontSize = 20.sp)
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    if (item is UiModel.RepoItem) {
-                                        Text(item.repo.name)
-                                        Text(item.repo.description.toString())
-                                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                            Text("⭐${item.repo.stars}")
-                                            Text("Language: ${item.repo.language}")
-                                            Text("Forks: ${item.repo.forks}")
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (item is UiModel.RepoItem) {
+                                            startActivity(
+                                                Intent(Intent.ACTION_VIEW, Uri.parse(item.repo.url))
+                                            )
                                         }
                                     }
+                                    .background(Color.LightGray)
+                            ) {
+                                if (item is UiModel.RepoItem) {
+                                    Text(item.repo.name)
+                                    Text(item.repo.description.toString())
+                                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text("⭐${item.repo.stars}")
+                                        Text("Language: ${item.repo.language}")
+                                        Text("Forks: ${item.repo.forks}")
+                                    }
                                 }
+                            }
                         }
 
                         if (lazyPagingItems.loadState.append == LoadState.Loading) {
@@ -121,11 +138,6 @@ class SearchRepositoriesActivity : AppCompatActivity() {
             }
         }
 
-//            initAdapter()
-//            val query = savedInstanceState?.getString(LAST_SEARCH_QUERY) ?: DEFAULT_QUERY
-//            search(query)
-//            initSearch(query)
-//            binding.retryButton.setOnClickListener { adapter.retry() }
 
 
         }
