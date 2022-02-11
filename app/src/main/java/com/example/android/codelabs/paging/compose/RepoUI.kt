@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +31,7 @@ fun RepoUI(repo: Repo){
             .border(2.dp, Color.Black, RoundedCornerShape(6.dp))
     ) {
         Text(repo.name, style = MaterialTheme.typography.h5, modifier = Modifier
-            .padding(8.dp))
+            .padding(8.dp), color = colorResource(R.color.titleColor))
 
         Text(repo.description.toString(), style = MaterialTheme.typography.subtitle1, modifier = Modifier
             .padding(8.dp))
@@ -40,13 +41,13 @@ fun RepoUI(repo: Repo){
             .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(repo.language.toString(), modifier = Modifier
+            Text(stringResource(R.string.language , repo.language.toString()), modifier = Modifier
                 .padding(8.dp),
-            style = MaterialTheme.typography.subtitle2)
-            Spacer(modifier = Modifier.width(16.dp))
+            style = MaterialTheme.typography.caption)
+            Spacer(modifier = Modifier.width(48.dp))
 
             Icon(painterResource(id = R.drawable.ic_star), "Stars")
-            Text(repo.stars.toString(), style = MaterialTheme.typography.subtitle2 , modifier = Modifier
+            Text(repo.stars.toString(), style = MaterialTheme.typography.caption , modifier = Modifier
                 .padding(8.dp)
                 .align(Alignment.CenterVertically)
             )
@@ -54,7 +55,7 @@ fun RepoUI(repo: Repo){
 
 
             Icon(painterResource(id = R.drawable.ic_git_branch), "Forks")
-            Text(repo.forks.toString(), style = MaterialTheme.typography.subtitle2 , modifier = Modifier
+            Text(repo.forks.toString(), style = MaterialTheme.typography.caption , modifier = Modifier
                 .padding(8.dp))
 
         }
