@@ -19,22 +19,28 @@ package com.example.android.codelabs.paging.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.renderscript.Sampler
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.isVisible
@@ -85,7 +91,9 @@ class SearchRepositoriesActivity : AppCompatActivity() {
 //                    val lazyPagingItems = pager.flow.collectAsLazyPagingItems()
                     val lazyPagingItems = viewModel.searchRepo(query).collectAsLazyPagingItems()
 
-                    LazyColumn {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
                             item {
                                 Text(
@@ -102,24 +110,33 @@ class SearchRepositoriesActivity : AppCompatActivity() {
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
-                                        if (item is UiModel.RepoItem) {
-                                            startActivity(
-                                                Intent(Intent.ACTION_VIEW, Uri.parse(item.repo.url))
-                                            )
-                                        }
-                                    }
-                                    .background(Color.LightGray)
                             ) {
                                 if (item is UiModel.RepoItem) {
-                                    Text(item.repo.name)
-                                    Text(item.repo.description.toString())
-                                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        Text("⭐${item.repo.stars}")
-                                        Text("Language: ${item.repo.language}")
-                                        Text("Forks: ${item.repo.forks}")
+
+                                    Card(modifier = Modifier
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                        .fillMaxWidth()
+                                        .border(2.dp, Color.Magenta, RoundedCornerShape(4.dp))
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .padding(4.dp)
+                                        .clickable{
+                                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.repo.url)))
+                                        }
+                                    ){
+                                    Column{
+                                        Text(item.repo.name, style = MaterialTheme.typography.button)
+                                        Text(item.repo.description.toString(), style = MaterialTheme.typography.caption)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                            Text("Stars: ${item.repo.stars}")
+                                            Text("Language: ${item.repo.language}")
+                                            Text("Forks: ${item.repo.forks}")
+                                        }
+                                    }
                                     }
                                 }
+//                                else if (item is UiModel.SeparatorItem){
+////                                    Divider(color = Color.Green, thickness = 4.dp, startIndent = 16.dp)
+//                                }
                             }
                         }
 
@@ -268,3 +285,5 @@ class SearchRepositoriesActivity : AppCompatActivity() {
         private const val DEFAULT_QUERY = "Android"
     }
 }
+
+
