@@ -47,7 +47,14 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose true
     }
+
+    composeOptions{
+        kotlinCompilerExtensionVersion compose
+    }
+
+    namespace 'com.example.android.codelabs.paging'
 }
 
 dependencies {
@@ -67,7 +74,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     implementation "androidx.room:room-runtime:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
+    implementation "androidx.room:room-paging:$roomVersion"
     implementation "androidx.paging:paging-runtime-ktx:$pagingVersion"
+    implementation "androidx.paging:paging-compose:1.0.0-alpha14" //Paging Compose dependency
     kapt "androidx.room:room-compiler:$roomVersion"
 
     // retrofit
@@ -75,4 +84,11 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpLoggingInterceptorVersion"
+
+    // Compose
+    implementation "androidx.compose.ui:ui-tooling:$compose"
+    implementation "androidx.compose.foundation:foundation:$compose"
+    implementation "androidx.compose.material:material:$compose"
+    implementation "androidx.activity:activity-compose:1.4.0"
+
 }
