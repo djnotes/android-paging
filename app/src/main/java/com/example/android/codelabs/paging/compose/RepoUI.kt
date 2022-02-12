@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.android.codelabs.paging.R
 import com.example.android.codelabs.paging.model.Repo
 import com.example.android.codelabs.paging.ui.UiModel
@@ -23,42 +24,79 @@ import com.example.android.codelabs.paging.ui.UiModel
 
 @Composable
 fun RepoUI(repo: Repo){
-    Column(
+
+    ConstraintLayout(
         Modifier
             .padding(4.dp)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
             .border(2.dp, Color.Black, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
     ) {
-        Text(repo.name, style = MaterialTheme.typography.h5, modifier = Modifier
-            .padding(8.dp), color = colorResource(R.color.titleColor))
+        val starsGuide = createGuidelineFromStart(0.5f)
+        val forksGuide = createGuidelineFromStart(0.75f)
+        val (fullName, description, language, stars, starsText, forks, forksText) = createRefs()
+
+        Text(repo.fullName, style = MaterialTheme.typography.h5, modifier = Modifier
+            .padding(8.dp)
+            .constrainAs(fullName) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+            }, color = colorResource(R.color.titleColor))
 
         Text(repo.description.toString(), style = MaterialTheme.typography.subtitle1, modifier = Modifier
-            .padding(8.dp))
+            .padding(8.dp)
+            .constrainAs(description) {
+                top.linkTo(fullName.bottom)
+                start.linkTo(parent.start)
+            }
+        )
 
-        Row(modifier = Modifier
-            .padding(0.dp)
-            .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(stringResource(R.string.language , repo.language.toString()), modifier = Modifier
-                .padding(8.dp),
+        Text(stringResource(R.string.language , repo.language.toString()), modifier = Modifier
+            .padding(8.dp)
+            .constrainAs(language) {
+                start.linkTo(parent.start)
+                top.linkTo(description.bottom)
+                bottom.linkTo(parent.bottom)
+            }
+            ,
             style = MaterialTheme.typography.caption)
-            Spacer(modifier = Modifier.width(48.dp))
 
-            Icon(painterResource(id = R.drawable.ic_star), "Stars")
-            Text(repo.stars.toString(), style = MaterialTheme.typography.caption , modifier = Modifier
+
+        Icon(painterResource(id = R.drawable.ic_star), "Stars",
+            modifier = Modifier
+                .constrainAs(stars){
+                    start.linkTo(starsGuide)
+                    bottom.linkTo(parent.bottom)
+                    top.linkTo(description.bottom)
+                }
+
+                )
+        Text(
+            repo.stars.toString(), style = MaterialTheme.typography.caption, modifier = Modifier
                 .padding(8.dp)
-                .align(Alignment.CenterVertically)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+                .constrainAs(starsText){
+                    start.linkTo(stars.end)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
 
 
-            Icon(painterResource(id = R.drawable.ic_git_branch), "Forks")
-            Text(repo.forks.toString(), style = MaterialTheme.typography.caption , modifier = Modifier
-                .padding(8.dp))
-
-        }
+        Icon(painterResource(id = R.drawable.ic_git_branch), "Forks",
+            modifier = Modifier
+                .constrainAs(forks){
+                    start.linkTo(forksGuide)
+                    bottom.linkTo(parent.bottom)
+                    top.linkTo(description.bottom)
+                }
+                )
+        Text(
+            repo.forks.toString(), style = MaterialTheme.typography.caption, modifier = Modifier
+                .padding(8.dp)
+                .constrainAs(forksText){
+                    start.linkTo(forks.end)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
 
 
     }
@@ -68,8 +106,8 @@ fun RepoUI(repo: Repo){
 @Preview(showBackground = true)
 @Composable
 fun PreviewRepoItem() {
-    val repo = Repo(1, "author/repo", "An Awesome Repo", "An awesome library that you need to do awesome stuff",
-    "https://example.com", 100, 10, "Kotlin")
+    val repo = Repo(1, "repo", "author/repo", "An awesome library that you need to do awesome stuff",
+    "https://example.com", 20000, 10, "Kotlin")
 
     RepoUI(repo = repo)
 
