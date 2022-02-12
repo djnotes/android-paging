@@ -92,4 +92,5 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended:$compose"
     implementation "androidx.activity:activity-compose:$activity"
     implementation "androidx.paging:paging-compose:1.0.0-alpha14"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
 }
