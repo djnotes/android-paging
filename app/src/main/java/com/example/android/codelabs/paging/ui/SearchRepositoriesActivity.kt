@@ -22,12 +22,23 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.example.android.codelabs.paging.Injection
+import com.example.android.codelabs.paging.compose.RepoUI
+import com.example.android.codelabs.paging.compose.SeparatorUI
 import com.example.android.codelabs.paging.databinding.ActivitySearchRepositoriesBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -48,8 +59,45 @@ class SearchRepositoriesActivity : AppCompatActivity() {
         // Make sure we cancel the previous job before creating a new one
         searchJob?.cancel()
         searchJob = lifecycleScope.launch {
-            viewModel.searchRepo(query).collectLatest {
-                adapter.submitData(it)
+//            viewModel.searchRepo(query).collectLatest {
+//                adapter.submitData(it)
+//            }
+
+            binding.list.apply{
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent{
+                    val lazyItems = viewModel.searchRepo(query).collectAsLazyPagingItems()
+
+                    LazyColumn{
+                        if(lazyItems.loadState.refresh == LoadState.Loading){
+                            item {
+                                Text(
+                                    "Please wait for items to load", modifier = Modifier
+                                        .wrapContentWidth()
+                                )
+                            }
+                        }
+
+                        items(lazyItems){item ->
+                            if (item is UiModel.RepoItem){
+                                RepoUI(repo = item.repo)
+                            }
+                            else if (item is UiModel.SeparatorItem){
+                                SeparatorUI(separatorItem = item)
+                            }
+                        }
+
+                        if (lazyItems.loadState.append == LoadState.Loading){
+                            item {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentWidth()
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -65,14 +113,14 @@ class SearchRepositoriesActivity : AppCompatActivity() {
             .get(SearchRepositoriesViewModel::class.java)
 
         // add dividers between RecyclerView's row items
-        val decoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        binding.list.addItemDecoration(decoration)
+//        val decoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+//        binding.list.addItemDecoration(decoration)
 
-        initAdapter()
+//        initAdapter()
         val query = savedInstanceState?.getString(LAST_SEARCH_QUERY) ?: DEFAULT_QUERY
         search(query)
         initSearch(query)
-        binding.retryButton.setOnClickListener { adapter.retry() }
+//        binding.retryButton.setOnClickListener { adapter.retry() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -83,43 +131,43 @@ class SearchRepositoriesActivity : AppCompatActivity() {
     private fun initAdapter() {
         val header = ReposLoadStateAdapter { adapter.retry() }
 
-        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
-            header = header,
-            footer = ReposLoadStateAdapter { adapter.retry() }
-        )
+//        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+//            header = header,
+//            footer = ReposLoadStateAdapter { adapter.retry() }
+//        )
 
-        adapter.addLoadStateListener { loadState ->
-
-            // show empty list
-            val isListEmpty = loadState.refresh is LoadState.NotLoading && adapter.itemCount == 0
-            showEmptyList(isListEmpty)
-
-            // Show a retry header if there was an error refreshing, and items were previously
-            // cached OR default to the default prepend state
-            header.loadState = loadState.mediator
-                ?.refresh
-                ?.takeIf { it is LoadState.Error && adapter.itemCount > 0 }
-                ?: loadState.prepend
-
-            // Only show the list if refresh succeeds, either from the the local db or the remote.
-            binding.list.isVisible =  loadState.source.refresh is LoadState.NotLoading || loadState.mediator?.refresh is LoadState.NotLoading
-            // Show loading spinner during initial load or refresh.
-            binding.progressBar.isVisible = loadState.mediator?.refresh is LoadState.Loading
-            // Show the retry state if initial load or refresh fails and there are no items.
-            binding.retryButton.isVisible = loadState.mediator?.refresh is LoadState.Error && adapter.itemCount == 0
-            // Toast on any error, regardless of whether it came from RemoteMediator or PagingSource
-            val errorState = loadState.source.append as? LoadState.Error
-                ?: loadState.source.prepend as? LoadState.Error
-                ?: loadState.append as? LoadState.Error
-                ?: loadState.prepend as? LoadState.Error
-            errorState?.let {
-                Toast.makeText(
-                    this,
-                    "\uD83D\uDE28 Wooops ${it.error}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+//        adapter.addLoadStateListener { loadState ->
+//
+//            // show empty list
+//            val isListEmpty = loadState.refresh is LoadState.NotLoading && adapter.itemCount == 0
+//            showEmptyList(isListEmpty)
+//
+//            // Show a retry header if there was an error refreshing, and items were previously
+//            // cached OR default to the default prepend state
+//            header.loadState = loadState.mediator
+//                ?.refresh
+//                ?.takeIf { it is LoadState.Error && adapter.itemCount > 0 }
+//                ?: loadState.prepend
+//
+//            // Only show the list if refresh succeeds, either from the the local db or the remote.
+//            binding.list.isVisible =  loadState.source.refresh is LoadState.NotLoading || loadState.mediator?.refresh is LoadState.NotLoading
+//            // Show loading spinner during initial load or refresh.
+//            binding.progressBar.isVisible = loadState.mediator?.refresh is LoadState.Loading
+//            // Show the retry state if initial load or refresh fails and there are no items.
+//            binding.retryButton.isVisible = loadState.mediator?.refresh is LoadState.Error && adapter.itemCount == 0
+//            // Toast on any error, regardless of whether it came from RemoteMediator or PagingSource
+//            val errorState = loadState.source.append as? LoadState.Error
+//                ?: loadState.source.prepend as? LoadState.Error
+//                ?: loadState.append as? LoadState.Error
+//                ?: loadState.prepend as? LoadState.Error
+//            errorState?.let {
+//                Toast.makeText(
+//                    this,
+//                    "\uD83D\uDE28 Wooops ${it.error}",
+//                    Toast.LENGTH_LONG
+//                ).show()
+//            }
+//        }
     }
 
     private fun initSearch(query: String) {
@@ -143,14 +191,14 @@ class SearchRepositoriesActivity : AppCompatActivity() {
         }
 
         // Scroll to top when the list is refreshed from network.
-        lifecycleScope.launch {
-            adapter.loadStateFlow
-                // Only emit when REFRESH LoadState for RemoteMediator changes.
-                .distinctUntilChangedBy { it.refresh }
-                // Only react to cases where Remote REFRESH completes i.e., NotLoading.
-                .filter { it.refresh is LoadState.NotLoading }
-                .collect { binding.list.scrollToPosition(0) }
-        }
+//        lifecycleScope.launch {
+//            adapter.loadStateFlow
+//                // Only emit when REFRESH LoadState for RemoteMediator changes.
+//                .distinctUntilChangedBy { it.refresh }
+//                // Only react to cases where Remote REFRESH completes i.e., NotLoading.
+//                .filter { it.refresh is LoadState.NotLoading }
+//                .collect { binding.list.scrollToPosition(0) }
+//        }
     }
 
     private fun updateRepoListFromInput() {
